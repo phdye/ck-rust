@@ -14,8 +14,8 @@
 //!
 //! # Branch Hints
 //!
-//! - [`likely`] - Hint that condition is likely true
-//! - [`unlikely`] - Hint that condition is likely false
+//! - `likely` - Hint that condition is likely true
+//! - `unlikely` - Hint that condition is likely false
 //!
 //! # Example
 //!

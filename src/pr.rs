@@ -8,25 +8,25 @@
 //!
 //! All atomic operations in this module use explicit memory orderings:
 //!
-//! - [`Ordering::Relaxed`] - No ordering guarantees
-//! - [`Ordering::Acquire`] - Loads acquire; prevents reordering with subsequent operations
-//! - [`Ordering::Release`] - Stores release; prevents reordering with prior operations
-//! - [`Ordering::AcqRel`] - Both acquire and release semantics
-//! - [`Ordering::SeqCst`] - Sequentially consistent; strongest ordering
+//! - `Ordering::Relaxed` - No ordering guarantees
+//! - `Ordering::Acquire` - Loads acquire; prevents reordering with subsequent operations
+//! - `Ordering::Release` - Stores release; prevents reordering with prior operations
+//! - `Ordering::AcqRel` - Both acquire and release semantics
+//! - `Ordering::SeqCst` - Sequentially consistent; strongest ordering
 //!
 //! # Operations
 //!
 //! ## Memory Barriers
-//! - [`barrier`] - Compiler barrier (no hardware fence)
-//! - [`fence_memory`], [`fence_acquire`], [`fence_release`] - Memory fences
+//! - `barrier` - Compiler barrier (no hardware fence)
+//! - `fence_memory`, `fence_acquire`, `fence_release` - Memory fences
 //!
 //! ## Atomic Load/Store
-//! - [`load`], [`store`] - Generic atomic load/store
+//! - `load`, `store` - Generic atomic load/store
 //!
 //! ## Read-Modify-Write
-//! - [`cas`] - Compare-and-swap
-//! - [`faa`] - Fetch-and-add
-//! - [`fas`] - Fetch-and-store (exchange)
+//! - `cas` - Compare-and-swap
+//! - `faa` - Fetch-and-add
+//! - `fas` - Fetch-and-store (exchange)
 //!
 //! # Example
 //!

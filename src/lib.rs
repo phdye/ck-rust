@@ -38,7 +38,7 @@
 //!
 //! ### Extended Primitives
 //! - [`elide`] - Hardware transactional memory lock elision
-//! - [`array`] - Concurrently-readable dynamic array
+//! - [`mod@array`] - Concurrently-readable dynamic array
 //! - [`hs`] - Hash set (single-writer, many-reader)
 //! - [`ht`] - Hash table (key-value pairs)
 //! - [`rhs`] - Robin-hood hash set

@@ -3,10 +3,10 @@
 //! This module provides several spinlock variants with different
 //! fairness and performance characteristics:
 //!
-//! - [`FasLock`] - Simple fetch-and-store spinlock (unfair but fast)
-//! - [`CasLock`] - Compare-and-swap spinlock (unfair)
-//! - [`TicketLock`] - Fair FIFO spinlock
-//! - [`McsLock`] - MCS queue-based spinlock (fair, cache-friendly)
+//! - `FasLock` - Simple fetch-and-store spinlock (unfair but fast)
+//! - `CasLock` - Compare-and-swap spinlock (unfair)
+//! - `TicketLock` - Fair FIFO spinlock
+//! - `McsLock` - MCS queue-based spinlock (fair, cache-friendly)
 
 use core::cell::UnsafeCell;
 use core::ops::{Deref, DerefMut};
