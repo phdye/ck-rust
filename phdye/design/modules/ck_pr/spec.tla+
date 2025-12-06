@@ -1,0 +1,195 @@
+---------------------------- MODULE ck_pr ----------------------------
+EXTENDS Integers, Sequences, FiniteSets, TLC
+
+\*
+\* Formal specification for ck_pr - atomic primitives module
+\* Derived from: spec.md
+\*
+\* This specification models the key atomic operations provided by ck_pr.
+\* Memory ordering constraints are simplified to sequential consistency
+\* for verification purposes.
+\*
+
+CONSTANTS
+    THREADS,        \* Set of thread identifiers
+    MAX_VALUE,      \* Maximum value for bounded model checking
+    ADDRESSES       \* Set of memory addresses
+
+VARIABLES
+    memory,         \* memory[addr] = current value at address
+    pc,             \* pc[t] = program counter for thread t
+    local           \* local[t] = local variables for thread t
+
+vars == << memory, pc, local >>
+
+------------------------------------------------------------
+\* Type Invariant
+TypeInvariant ==
+    /\ memory \in [ADDRESSES -> 0..MAX_VALUE]
+    /\ pc \in [THREADS -> {"idle", "cas_load", "cas_compare", "cas_done",
+                           "faa_load", "faa_add", "faa_done",
+                           "load", "store"}]
+    /\ local \in [THREADS -> [old: 0..MAX_VALUE,
+                              compare: 0..MAX_VALUE,
+                              new: 0..MAX_VALUE,
+                              result: BOOLEAN]]
+
+------------------------------------------------------------
+\* Initial State
+Init ==
+    /\ memory = [a \in ADDRESSES |-> 0]
+    /\ pc = [t \in THREADS |-> "idle"]
+    /\ local = [t \in THREADS |-> [old |-> 0, compare |-> 0, new |-> 0, result |-> FALSE]]
+
+------------------------------------------------------------
+\* Atomic Load Operation
+\* ck_pr_load atomically reads a value from memory
+\*
+\* Preconditions: None
+\* Postconditions: Returns value at memory[addr]
+Load(t, addr) ==
+    /\ pc[t] = "idle"
+    /\ pc' = [pc EXCEPT ![t] = "load"]
+    /\ local' = [local EXCEPT ![t].old = memory[addr]]
+    /\ UNCHANGED memory
+
+LoadComplete(t) ==
+    /\ pc[t] = "load"
+    /\ pc' = [pc EXCEPT ![t] = "idle"]
+    /\ UNCHANGED << memory, local >>
+
+------------------------------------------------------------
+\* Atomic Store Operation
+\* ck_pr_store atomically writes a value to memory
+\*
+\* Preconditions: None
+\* Postconditions: memory[addr] = value
+Store(t, addr, value) ==
+    /\ pc[t] = "idle"
+    /\ pc' = [pc EXCEPT ![t] = "store"]
+    /\ memory' = [memory EXCEPT ![addr] = value]
+    /\ UNCHANGED local
+
+StoreComplete(t) ==
+    /\ pc[t] = "store"
+    /\ pc' = [pc EXCEPT ![t] = "idle"]
+    /\ UNCHANGED << memory, local >>
+
+------------------------------------------------------------
+\* Compare-and-Swap Operation
+\* ck_pr_cas atomically compares and swaps if equal
+\*
+\* Preconditions: None
+\* Postconditions:
+\*   IF memory[addr] == compare THEN memory[addr] = new, return TRUE
+\*   ELSE return FALSE
+
+\* CAS is modeled as a single atomic step for sequential consistency
+CAS(t, addr, compare, new) ==
+    /\ pc[t] = "idle"
+    /\ IF memory[addr] = compare
+       THEN /\ memory' = [memory EXCEPT ![addr] = new]
+            /\ local' = [local EXCEPT ![t].result = TRUE,
+                                      ![t].old = memory[addr]]
+       ELSE /\ local' = [local EXCEPT ![t].result = FALSE,
+                                      ![t].old = memory[addr]]
+            /\ UNCHANGED memory
+    /\ pc' = [pc EXCEPT ![t] = "cas_done"]
+
+CASComplete(t) ==
+    /\ pc[t] = "cas_done"
+    /\ pc' = [pc EXCEPT ![t] = "idle"]
+    /\ UNCHANGED << memory, local >>
+
+------------------------------------------------------------
+\* Fetch-and-Add Operation
+\* ck_pr_faa atomically adds delta to memory and returns old value
+\*
+\* Preconditions: None
+\* Postconditions:
+\*   old = memory[addr]
+\*   memory[addr] = old + delta
+\*   return old
+
+\* FAA is modeled as a single atomic step
+FAA(t, addr, delta) ==
+    /\ pc[t] = "idle"
+    /\ local' = [local EXCEPT ![t].old = memory[addr]]
+    /\ memory' = [memory EXCEPT ![addr] = (memory[addr] + delta) % (MAX_VALUE + 1)]
+    /\ pc' = [pc EXCEPT ![t] = "faa_done"]
+
+FAAComplete(t) ==
+    /\ pc[t] = "faa_done"
+    /\ pc' = [pc EXCEPT ![t] = "idle"]
+    /\ UNCHANGED << memory, local >>
+
+------------------------------------------------------------
+\* Fetch-and-Store Operation
+\* ck_pr_fas atomically exchanges value and returns old value
+\*
+\* Preconditions: None
+\* Postconditions:
+\*   old = memory[addr]
+\*   memory[addr] = new
+\*   return old
+FAS(t, addr, new) ==
+    /\ pc[t] = "idle"
+    /\ local' = [local EXCEPT ![t].old = memory[addr]]
+    /\ memory' = [memory EXCEPT ![addr] = new]
+    /\ pc' = [pc EXCEPT ![t] = "idle"]
+
+------------------------------------------------------------
+\* Next State Relation
+\* Non-deterministically choose an operation and thread
+Next ==
+    \E t \in THREADS, addr \in ADDRESSES, v \in 0..MAX_VALUE :
+        \/ Load(t, addr)
+        \/ LoadComplete(t)
+        \/ Store(t, addr, v)
+        \/ StoreComplete(t)
+        \/ CAS(t, addr, v, (v + 1) % (MAX_VALUE + 1))
+        \/ CASComplete(t)
+        \/ FAA(t, addr, 1)
+        \/ FAAComplete(t)
+        \/ FAS(t, addr, v)
+
+------------------------------------------------------------
+\* Specification
+Spec == Init /\ [][Next]_vars /\ WF_vars(Next)
+
+------------------------------------------------------------
+\* Safety Properties
+
+\* Atomicity: No torn reads/writes
+\* (Implicitly satisfied by modeling operations as single steps)
+
+\* CAS Correctness: CAS succeeds iff comparison matched
+CASCorrectness ==
+    \A t \in THREADS :
+        pc[t] = "cas_done" =>
+            (local[t].result = TRUE) <=> (local[t].old = local[t].compare)
+
+\* Value Preservation: Values in memory are within bounds
+ValueBounded ==
+    \A addr \in ADDRESSES : memory[addr] >= 0 /\ memory[addr] <= MAX_VALUE
+
+------------------------------------------------------------
+\* Liveness Properties
+
+\* Lock-Freedom: Some thread always makes progress
+\* (Simplified: operations eventually complete)
+Progress ==
+    \A t \in THREADS :
+        pc[t] # "idle" ~> pc[t] = "idle"
+
+------------------------------------------------------------
+\* Verification Commands (for TLC)
+\*
+\* Run with small constants for bounded model checking:
+\* THREADS = {t1, t2}
+\* MAX_VALUE = 3
+\* ADDRESSES = {addr1}
+
+=============================================================================
+\* Modification History
+\* Created for CK design capture
