@@ -10,6 +10,18 @@ This document provides explicit instructions for generating a complete, executab
 - Tests have been generated for every module in every tier listed in `<design-base>/design/implementation-order.md`
 - Commit after each module completes
 
+## Guidance
+
+**Tiers are methodology scaffolding, not target project architecture.**
+- Do NOT include "tier" in generated test code or comments
+- Do NOT reference `implementation-order.md` in target project files
+- The target project may use "tier" for entirely different purposes
+
+**Follow target project conventions.**
+- Match existing test organization, naming, and structure
+- Use idiomatic test patterns for the target language
+- Follow the chosen test framework's conventions
+
 ## Prerequisites
 
 - Completed design capture (per design-capture.md)

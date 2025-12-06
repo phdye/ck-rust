@@ -11,6 +11,18 @@ This document provides explicit instructions for implementing a system from a ca
 - All tests pass for every module
 - Commit after each module completes
 
+## Guidance
+
+**Tiers are methodology scaffolding, not target project architecture.**
+- Do NOT include "tier" in generated code or comments
+- Do NOT reference `implementation-order.md` in target project files
+- The target project may use "tier" for entirely different purposes
+
+**Follow target project conventions.**
+- Match existing code style, naming, and organization
+- Use idiomatic patterns for the target language
+- Use the language's standard doc comment format (rustdoc, Doxygen, etc.)
+
 ## Prerequisites
 
 - Completed captured-design (per design-capture.md)
