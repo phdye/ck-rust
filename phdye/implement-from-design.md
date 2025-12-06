@@ -4,6 +4,13 @@
 
 This document provides explicit instructions for implementing a system from a captured design. The implementation proceeds module by module in dependency order, with each module's tests passing before proceeding to the next.
 
+## Completion Criteria
+
+**This methodology is complete when:**
+- Every module in every tier listed in `<design-base>/design/implementation-order.md` has been implemented
+- All tests pass for every module
+- Commit after each module completes
+
 ## Prerequisites
 
 - Completed captured-design (per design-capture.md)
@@ -40,8 +47,10 @@ Confirm all required design artifacts exist.
 #### ACTION
 Verify these exist:
 
+If <design-base> is not assigned, <design-base> = '.'
+
 ```
-captured-design/
+<design-base>/design/
 ├── scope.md
 ├── modules.md
 ├── implementation-order.md
