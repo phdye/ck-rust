@@ -8,4 +8,4 @@
 
 4. execute phdye/implement-from-design.md
 
-5. execute phdye/create-doc.md
+5. execute phdye/create-documentation.md
