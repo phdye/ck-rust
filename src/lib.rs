@@ -18,7 +18,7 @@
 //! - [`pr`] - Atomic primitives and memory barriers
 //!
 //! ### Basic Building Blocks
-//! - [`backoff`] - Exponential backoff for contention management
+//! - [`mod@backoff`] - Exponential backoff for contention management
 //! - [`stack`] - Lock-free stack
 //! - [`queue`] - BSD-style queue macros
 //! - [`ring`] - Concurrent ring buffer
