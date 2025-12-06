@@ -4,6 +4,14 @@
 
 This document provides explicit instructions for implementing a system from a captured design. The implementation proceeds module by module in dependency order, with each module's tests passing before proceeding to the next.
 
+## Scope
+
+**IMPORTANT:** Implementation is complete only when ALL modules from `implementation-order.md` have been implemented across ALL tiers (Tier 0 through the final tier). Do not stop after partial completion.
+
+## Version Control
+
+**Commit after each module:** After each module passes its tests, commit and push the changes. This allows incremental review and provides recovery points.
+
 ## Prerequisites
 
 - Completed captured-design (per design-capture.md)
@@ -734,7 +742,14 @@ Record completion and determine next module.
 
 #### ACTION
 
-**Update tracking file:**
+**1. Commit and push the completed module:**
+```bash
+git add src/{module}.rs src/lib.rs
+git commit -m "feat: implement {module} module from design"
+git push
+```
+
+**2. Update tracking file:**
 ```markdown
 ## Tier 0 Modules
 | Module | Status | Tests Passing | Notes |
@@ -743,7 +758,7 @@ Record completion and determine next module.
 | {next_module} | Not Started | 0/N | |
 ```
 
-**Select next module:**
+**3. Select next module:**
 ```
 IF current tier has more unimplemented modules:
     Select any unimplemented module in current tier
@@ -751,21 +766,23 @@ ELSE IF higher tiers exist:
     Move to next tier
     Select any module in new tier
 ELSE:
-    All modules complete
+    All modules complete → Proceed to Part III
 ```
 
-**Verify next module's dependencies:**
+**4. Verify next module's dependencies:**
 ```
 For each dependency of next module:
     Assert: dependency is marked Complete
 ```
 
 #### OUTPUT
+- Module committed and pushed
 - Tracking file updated
 - Next module selected (or all complete)
 
 #### VALIDATION
 ```
+[ ] Module changes committed and pushed
 [ ] Completed module marked in tracking file
 [ ] Next module selected
 [ ] Next module's dependencies all complete
